@@ -28,21 +28,57 @@ def naked_twins(values):
     Returns:
       # the values dictionary with the naked twins eliminated from peers.
     """
+
+    # there are 29 units in sudoku: row_units(9), column units(9),
+    # square_units(9), and diagonal unit(2)
+    #
+    # the constraints will be propagated into every 29 units with this for loop.
     for unit in unitlist:
+
+        # first, we don't care the numbers with a length of 1 in every 9 boxes.
+        # so we'll get started by taking all the values whose length are
+        # not 1 in a box as the `unsolved` one.
+
+        # this is intented for the sake of avoiding unnecessary computations for
+        # the solved ones in 9 boxes in a later.
         unsolved = [box for box in unit if len(values[box]) != 1]
 
+        # next, we should investigate which one has the naked twins in 9 boxes.
+        # therefore, in every 9 units, all the values whose length is 2 could
+        # be considered as a candidate for the naked twins.
         two_digit_boxes = [box for box in unit if len(values[box]) == 2]
+
+        # But to be the naked twins between the boxes with two-length values,
+        # their values must duplicated in boxes.
+        #
+        # To find out which boxes are duplicated, we're going to introduce a
+        # dictionary here, its keys is going to be each numbers in a box and
+        # its values is going to be a list with the name of boxes (ex. D4, E6)
+        # that has every duplicated numbers.
         dups = defaultdict(list)
         for box in two_digit_boxes:
             digit = values[box]
             dups[digit].append(box)
 
+        # if, as the value in a dictionary, the length of the list is greater
+        # than 1, it means there are duplicated boxes at where that value is
+        # therefore, we can take all the boxes which is greater than 1 in a list
+        # into the naked twins.
         twin_boxes = list(itertools.chain(*[v for k, v in dups.items() if len(v) > 1]))
 
+        # So far, we could find out what the unsolved boxes and the naked twin
+        # boxes are.
+        # Now, we invastigate 9 boxes in a unit again with these boxes.
         for box in unit:
+            # we're going to choose only the unsolved boxes from 9 boxes, and
+            # also exclude the naked twin boxes itself from 9 boxes.
             if box in unsolved and box not in twin_boxes:
+                # take one box from twin boxes
                 for twin in twin_boxes:
+                    # take one digit from the twin box
                     for digit in values[twin]:
+                        # then replace the value of the unsolved box with the
+                        # value of the naked twin box
                         assign_value(values, box, values[box].replace(digit, ''))
     return values
 
@@ -143,6 +179,8 @@ def solve(grid):
     Returns:
         The dictionary representation of the final sudoku grid. False if no solution exists.
     """
+    # grid_values() function returns a dictionary representation of the sudoku
+    # grid. then invoke search() function for the dictionary.
     values = search(grid_values(grid))
     return values
 
@@ -159,8 +197,6 @@ row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
 unitlist = row_units + column_units + square_units + [diagonal_unit_1] + [diagonal_unit_2]
-print(">>>> {}".format(unitlist))
-print(">>>> {}".format(len(unitlist)))
 #unitlist = row_units + column_units + square_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)

@@ -3,11 +3,38 @@
 
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?
-A: Look for all duplicate values of each row and column in sudoku. However, not all the duplicate values, but the only values whose length is 2 are regarded as those corresponding to the naked twins. Then, if each row and column has a number greater than the naked twins, delete the number corresponding to the naked twin one by one.
+
+A: Sudoku has 29 units in total, which are 9 row units, 9 comlumn units,
+9 square units and 2 diagonal units. So the constraints will be
+propagated into every 29 units using loop. And keep in mind that every
+unit has 9 boxes (or numbers). First, in every loop for 29 units, we
+don't care the numbers with a length of 1 in a box. We're just going to
+take the box of 1-length values as solved boxes. Because, we don't need
+to unnecessary computation for the solved ones in 9 boxes.
+
+Next, we should investigate which one has the naked twins in 9 boxes. In every
+units, all the values whose length is 2 could be considered as a candidate for
+the naked twins. But to be the naked twins between the boxes with two-length values,
+their values must duplicated in boxes.
+
+To find out which boxes are duplicated, we're going to introduce a dictionary,
+its keys is going to be each numbers in a box and its values is going to
+be a list with the name of boxes (ex. D4, E6) that has every duplicated numbers.
+
+If, the length of the list is greater than 1, it means there are duplicated
+boxes at where that value is. Therefore, we can take all the boxes which is
+greater than 1 in a list into the naked twins.
+
+So far, we could find out what the unsolved boxes and the naked twin boxes are.
+Now, we invastigate 9 boxes in a unit again with these boxes. We're going to
+choose only the unsolved boxes from 9 boxes, and also exclude the naked twin
+boxes itself from 9 boxes. Then, replace the value of the unsolved box with
+the value of the naked twin box
+
 
 # Question 2 (Diagonal Sudoku)
-Q: How do we use constraint propagation to solve the diagonal sudoku problem?
-A: It is simple. Add diagonal units to existing units. As well as the existing `eliminate ()` and `only_choice ()` algorithms, apply the `naked_twins()` algorithms to the strategies to solve all of the units including the diagonal units. 
+Q: How do we use constraint propagation to shouolve the diagonal sudoku problem?
+A: It is simple. Add two diagonal units into the exsiting entire unit. Then, we have 29 units to propagate the constraint. As well as the existing `eliminate ()` and `only_choice ()` algorithms, apply the `naked_twins()` algorithms to the strategies to solve all of the units which has included the diagonal units.
 
 ### Install
 
