@@ -1,3 +1,6 @@
+from collections import defaultdict
+import itertools
+
 def cross(A, B):
     return [s+t for s in A for t in B]
 
@@ -25,44 +28,22 @@ def naked_twins(values):
     Returns:
       # the values dictionary with the naked twins eliminated from peers.
     """
-    def find_twins(keys, values):
-        dups = dict()
-        for k in keys:
-            digit =  values[k]
-            if len(digit) != 2:
-                continue
+    for unit in unitlist:
+        unsolved = [box for box in unit if len(values[box]) != 1]
 
-            if digit in dups:
-                dups[digit] += 1
-            else:
-                dups[digit] = 1
-        twins = [k for k, v in dups.items() if v > 1]
-        return twins
+        two_digit_boxes = [box for box in unit if len(values[box]) == 2]
+        dups = defaultdict(list)
+        for box in two_digit_boxes:
+            digit = values[box]
+            dups[digit].append(box)
 
-    def replace(keys, twins, values):
-        for k in keys:
-            digit = values[k]
-            for twin in twins:
-                if len(digit) > len(twin):
-                    for d in digit:
-                        if d in twin:
-                            digit = digit.replace(d, '')
-                            assign_value(values, k, digit)
-        return values
+        twin_boxes = list(itertools.chain(*[v for k, v in dups.items() if len(v) > 1]))
 
-    for units in row_units:
-        unsolved = [unit for unit in units if len(values[unit]) != 1]
-        twins = find_twins(unsolved, values)
-        if len(twins) == 0: continue
-        values = replace(unsolved,  twins, values)
-
-    for units in column_units:
-        unsolved = [unit for unit in units if len(values[unit]) != 1]
-        twins = find_twins(unsolved, values)
-
-        if len(twins) == 0: continue
-        values = replace(unsolved, twins, values)
-
+        for box in unit:
+            if box in unsolved and box not in twin_boxes:
+                for twin in twin_boxes:
+                    for digit in values[twin]:
+                        assign_value(values, box, values[box].replace(digit, ''))
     return values
 
 
@@ -178,6 +159,8 @@ row_units = [cross(r, cols) for r in rows]
 column_units = [cross(rows, c) for c in cols]
 square_units = [cross(rs, cs) for rs in ('ABC','DEF','GHI') for cs in ('123','456','789')]
 unitlist = row_units + column_units + square_units + [diagonal_unit_1] + [diagonal_unit_2]
+print(">>>> {}".format(unitlist))
+print(">>>> {}".format(len(unitlist)))
 #unitlist = row_units + column_units + square_units
 units = dict((s, [u for u in unitlist if s in u]) for s in boxes)
 peers = dict((s, set(sum(units[s],[]))-set([s])) for s in boxes)
