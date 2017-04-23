@@ -4,37 +4,50 @@
 # Question 1 (Naked Twins)
 Q: How do we use constraint propagation to solve the naked twins problem?
 
-A: Sudoku has 29 units in total, which are 9 row units, 9 comlumn units,
+A: Sudoku has 29 units in total, which are 9 row units, 9 column units,
 9 square units and 2 diagonal units. So the constraints will be
-propagated into every 29 units using loop. And keep in mind that every
+propagated into every 29 units using a loop. And keep in mind that every
 unit has 9 boxes (or numbers). First, in every loop for 29 units, we
 don't care the numbers with a length of 1 in a box. We're just going to
-take the box of 1-length values as solved boxes. Because, we don't need
+take the box of 1-length values as solved boxes. Because we don't need
 to unnecessary computation for the solved ones in 9 boxes.
 
 Next, we should investigate which one has the naked twins in 9 boxes. In every
-units, all the values whose length is 2 could be considered as a candidate for
+unit, all the values whose length is 2 could be considered as a candidate for
 the naked twins. But to be the naked twins between the boxes with two-length values,
-their values must duplicated in boxes.
+their values must be duplicated in boxes.
 
 To find out which boxes are duplicated, we're going to introduce a dictionary,
-its keys is going to be each numbers in a box and its values is going to
-be a list with the name of boxes (ex. D4, E6) that has every duplicated numbers.
+its keys is going to be each number in a box and its values is going to
+be a list with the name of boxes (ex. D4, E6) that has every duplicated number.
 
-If, the length of the list is greater than 1, it means there are duplicated
-boxes at where that value is. Therefore, we can take all the boxes which is
+If the length of the list is greater than 1, it means there are duplicated
+boxes at where that value is located. Therefore, we can take all the boxes which are
 greater than 1 in a list into the naked twins.
 
 So far, we could find out what the unsolved boxes and the naked twin boxes are.
-Now, we invastigate 9 boxes in a unit again with these boxes. We're going to
+Now, we investigate 9 boxes in a unit again with these boxes. We're going to
 choose only the unsolved boxes from 9 boxes, and also exclude the naked twin
 boxes itself from 9 boxes. Then, replace the value of the unsolved box with
-the value of the naked twin box
-
+the value of the naked twin box.
 
 # Question 2 (Diagonal Sudoku)
-Q: How do we use constraint propagation to shouolve the diagonal sudoku problem?
-A: It is simple. Add two diagonal units into the exsiting entire unit. Then, we have 29 units to propagate the constraint. As well as the existing `eliminate ()` and `only_choice ()` algorithms, apply the `naked_twins()` algorithms to the strategies to solve all of the units which has included the diagonal units.
+Q: How do we use constraint propagation on to solve the diagonal sudoku problem?
+
+A: Diagonal Sudoku is just like regular sudoku but with two extra grid.
+So the constraints is the two diagonal grid must put the digits from 1
+to 9 in each unit.
+
+We can get each grid of the two diagonal units with the following code:
+
+    diagonal_unit_1 = [rows[x] + cols[x] for x in range(len(rows))]
+    diagonal_unit_2 = [rows[::-1][x] + cols[x] for x in range(len(rows))]
+
+Then, the only way to propagate the constraint is just to make regular sudoku
+have the above additional grid. We don't need to have a further modification
+to the constraints propagation code. Because the constraint propagation
+can be applied to two extra unit just like regular units without worrying
+about where each unit is located.
 
 ### Install
 
